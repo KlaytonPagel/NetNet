@@ -1,4 +1,5 @@
 from tkinter import *
+from scapy.all import *
 
 
 # Manage the different screens and windows______________________________________________________________________________
@@ -14,7 +15,12 @@ class ScreenManager:
         # Holds all widgets on the screen__________________
         self.on_screen = []
 
+        # Set up the main screen___________________________
+        self.traffic_frame = None
         self.main_screen()
+
+        # Set up the packet sniffer________________________
+        self.sniffer = AsyncSniffer(prn=self.add_packets)
 
         self.screen.mainloop()
 
@@ -22,6 +28,7 @@ class ScreenManager:
     def clear_screen(self):
         for widget in self.on_screen:
             widget.destroy()
+        self.on_screen = []
 
     # Build The Main Startup Window_____________________________________________________________________________________
     def main_screen(self):
@@ -29,14 +36,18 @@ class ScreenManager:
 
         # Navigation Bar frame_____________________________
         nav_bar = Frame(self.screen, width=self.screen.winfo_screenwidth())
-        nav_bar.pack_propagate(False)
         self.on_screen.append(nav_bar)
-        nav_bar.pack()
+        nav_bar.pack(fill=X)
 
         # Start Button to start Sniffing___________________
-        start_button = Button(nav_bar, text="Start")
+        start_button = Button(nav_bar, text="Start", command=lambda: self.sniffer.start())
         self.on_screen.append(start_button)
-        start_button.pack()
+        start_button.pack(side=LEFT)
+
+        # Stop Button to start Sniffing____________________
+        stop_button = Button(nav_bar, text="Stop", command=lambda: self.sniffer.stop())
+        self.on_screen.append(stop_button)
+        stop_button.pack(side=LEFT)
 
         # Title Label______________________________________
         title = Label(self.screen, text="NetNet", font=("arial", 25))
@@ -44,11 +55,18 @@ class ScreenManager:
         title.pack()
 
         # Frame for Network traffic________________________
-        traffic_frame = Frame(self.screen, width=self.screen.winfo_screenwidth(),
-                              height=self.screen.winfo_screenheight())
-        traffic_frame.pack_propagate(False)
-        self.on_screen.append(traffic_frame)
-        traffic_frame.pack()
+        self.traffic_frame = Frame(self.screen, bg="Blue")
+        self.on_screen.append(self.traffic_frame)
+        self.traffic_frame.pack(fill=X)
+
+    # Adds A Button For A Packet To The Traffic Frame___________________________________________________________________
+    def add_packets(self, pkt):
+        packet_button = Button(self.traffic_frame, text=pkt.sprintf("{IP: IPV4: %IP.src% -> %IP.dst%}"
+                           "{TCP: TCP Port: %TCP.sport% -> %TCP.dport%}"
+                           "{UDP: UDP Port: %UDP.sport% -> %UDP.dport%}"))
+        self.on_screen.append(packet_button)
+        packet_button.pack()
+        return
 
 
-# ScreenManager()
+ScreenManager()
