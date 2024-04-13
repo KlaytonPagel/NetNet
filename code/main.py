@@ -28,16 +28,30 @@ if __name__ == "__main__":
             self.screen.mainloop()
 
         # Clears all the widgets from the screen________________________________________________________________________
-        def clear_screen(self):
+        def clear_screen(self, clear_traffic=False):
+
+            # Stop the sniffer if it's running_____________
             try:
                 self.sniffer.stop()
             except:
                 pass
+
+            # Clear widgets from the screen________________
             for widget in self.on_screen:
                 widget.destroy()
             self.on_screen = []
+
+            # Forget packet buttons to be repacked later___
             for packet in self.captured:
                 packet.pack_forget()
+
+            # If clear traffic is on destroy packet buttons
+            if clear_traffic:
+                for packet in self.captured:
+                    packet.destroy()
+                self.captured = []
+
+
 
         # Build The Main Startup Window_________________________________________________________________________________
         def main_screen(self):
@@ -58,6 +72,12 @@ if __name__ == "__main__":
             stop_button = Button(nav_bar, text="Stop", font=("arial", 15), command=lambda: self.sniffer.stop())
             self.on_screen.append(stop_button)
             stop_button.pack(side=LEFT)
+
+            # Button to clear the packets from screen______
+            clear_button = Button(nav_bar, text="Clear", font=("arial", 15), command=lambda: [self.clear_screen(True),
+                                                                                              self.main_screen()])
+            self.on_screen.append(clear_button)
+            clear_button.pack(side=LEFT)
 
             # Title Label__________________________________
             title = Label(self.screen, text="NetNet", font=("arial", 25))
@@ -81,7 +101,8 @@ if __name__ == "__main__":
             name = pkt.sprintf("{IP: IPV4: %IP.src% -> %IP.dst%}"
                                "{TCP: TCP Port: %TCP.sport% -> %TCP.dport%}"
                                "{UDP: UDP Port: %UDP.sport% -> %UDP.dport%}")
-            packet_button = Button(self.traffic_frame, text=name, command=lambda: self.packet_details(data))
+            packet_button = Button(self.traffic_frame, text=name, command=lambda: self.packet_details(data),
+                                   width=self.screen.winfo_screenwidth())
             self.captured.append(packet_button)
             packet_button.pack()
             return
@@ -101,7 +122,7 @@ if __name__ == "__main__":
             back_button.pack(side=LEFT)
 
             # Entry Disabled entry box to display the packet data to the user
-            data_entry = Text(self.screen)
+            data_entry = Text(self.screen, relief="groove")
             self.on_screen.append(data_entry)
             data_entry.insert(1.0, data)
             data_entry.configure(state=DISABLED)
