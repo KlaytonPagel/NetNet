@@ -33,7 +33,7 @@ class ScreenManager:
         self.on_screen.append(nav_bar)
         nav_bar.pack()
 
-        # Start Button to start scraping___________________
+        # Start Button to start Sniffing___________________
         start_button = Button(nav_bar, text="Start")
         self.on_screen.append(start_button)
         start_button.pack()
@@ -51,4 +51,4 @@ class ScreenManager:
         traffic_frame.pack()
 
 
-ScreenManager()
+# ScreenManager()

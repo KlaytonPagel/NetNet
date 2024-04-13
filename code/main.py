@@ -13,6 +13,10 @@ if __name__ == "__main__":
         return pkt.show()
 
     def filtered(pkt):
-        return pkt.sprintf("{IP: IPV4 %IP.src% -> %IP.dst%\n}{TCP: Port: %TCP.sport% -> %TCP.dport%\n}")
+        for packet in pkt:
+            print("OhhhhYa")
+        return pkt.sprintf("{IP: IPV4: %IP.src% -> %IP.dst%\n}"
+                           "{TCP: TCP Port: %TCP.sport% -> %TCP.dport%\n}"
+                           "{UDP: UDP Port: %UDP.sport% -> %UDP.dport%\n}")
 
     sniff(prn=filtered)
