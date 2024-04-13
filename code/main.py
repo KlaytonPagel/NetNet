@@ -36,6 +36,8 @@ if __name__ == "__main__":
             for widget in self.on_screen:
                 widget.destroy()
             self.on_screen = []
+            for packet in self.captured:
+                packet.pack_forget()
 
         # Build The Main Startup Window_________________________________________________________________________________
         def main_screen(self):
@@ -63,9 +65,15 @@ if __name__ == "__main__":
             title.pack()
 
             # Frame for Network traffic____________________
-            self.traffic_frame = Frame(self.screen)
-            self.on_screen.append(self.traffic_frame)
-            self.traffic_frame.pack(fill=X)
+            # If there is no previously captured traffic
+            if len(self.captured) == 0:
+                self.traffic_frame = Frame(self.screen)
+                self.captured.append(self.traffic_frame)
+                self.traffic_frame.pack(fill=X)
+            else:
+                # Display any traffic that is still in the system
+                for packet in self.captured:
+                    packet.pack()
 
         # Adds A Button For A Packet To The Traffic Frame_______________________________________________________________
         def add_packets(self, pkt):
