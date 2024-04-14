@@ -7,7 +7,7 @@ class DiscordAlert:
     # Set up alert system with the url and header
     def __init__(self):
         self.url = "Server URL"
-        self.headers = {"authorization": "Headers Authorization"}
+        self.headers = {"authorization": "Header Authorization"}
 
     # Use passed in message and send the post to the server
     def send_alert(self, message):

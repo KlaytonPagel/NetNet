@@ -18,6 +18,7 @@ if __name__ == "__main__":
             self.screen = Tk()
             self.screen.title("NetNet")
             self.screen.geometry(f'{self.screen.winfo_screenwidth() // 2}x{self.screen.winfo_screenheight() // 1.5:.0f}')
+            self.screen.iconbitmap("../Images/NetNet.ico")
 
             # Holds all widgets on the screen______________
             self.on_screen = []
