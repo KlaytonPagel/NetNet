@@ -4,6 +4,7 @@ from functools import partial
 import datetime as datetime
 import json
 import os
+from alert import DiscordAlert
 
 
 if __name__ == "__main__":
@@ -22,6 +23,10 @@ if __name__ == "__main__":
             self.on_screen = []
             self.captured = []
             self.packets = []
+
+            # Set up the discord alert system______________
+            self.alert = DiscordAlert()
+            self.alerts = False
 
             # Set up the main screen_______________________
             self.traffic_frame = None
@@ -119,6 +124,17 @@ if __name__ == "__main__":
             self.on_screen.append(apply_filter_button)
             apply_filter_button.pack(side=RIGHT)
 
+            # button to toggle on or off the alert system__
+            if self.alerts:
+                alert_button_text = "Alerts: on"
+                alert_button_color = "green"
+            else:
+                alert_button_text = "Alerts: off"
+                alert_button_color = "White"
+            alert_button = Button(nav_bar, text=alert_button_text, command=self.toggle_alerts, bg=alert_button_color)
+            self.on_screen.append(alert_button)
+            alert_button.pack()
+
             # Title Label__________________________________
             title = Label(self.screen, text="NetNet", font=("arial", 25))
             self.on_screen.append(title)
@@ -209,6 +225,10 @@ if __name__ == "__main__":
             packet_button.pack()
             self.canvas.yview_moveto(1)
 
+            # if alerts are on, send an alert to the discord server
+            if self.alerts:
+                self.alert.send_alert(data)
+
         # Shows the data contained inside the packet____________________________________________________________________
         def packet_details_screen(self, data):
             self.clear_screen()
@@ -236,7 +256,7 @@ if __name__ == "__main__":
             def del_parameter(widgets):
                 for widget in widgets:
                     widget.destroy()
-                    
+
             # Adds another parameter and value to the filter creator___________
             def add_parameter(parameter="", value=""):
                 # add a frame for the parameter and value entries
@@ -358,6 +378,14 @@ if __name__ == "__main__":
                 params.append(param)
 
             self.filter_screen(name=filter_name, filter_parameters=params)
+
+        # Toggle the alert system_______________________________________________________________________________________
+        def toggle_alerts(self):
+            if self.alerts:
+                self.alerts = False
+            else:
+                self.alerts = True
+            self.main_screen()
 
 
     NetNet()
