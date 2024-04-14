@@ -35,7 +35,6 @@ if __name__ == "__main__":
 
             # Set up the packet sniffer____________________
             self.sniffer = AsyncSniffer(prn=self.add_packets)
-
             self.screen.mainloop()
 
         # Clears all the widgets from the screen________________________________________________________________________
