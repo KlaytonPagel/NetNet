@@ -49,6 +49,7 @@ if __name__ == "__main__":
 
             # If clear traffic is on destroy packet buttons
             if clear_traffic:
+                self.built = False
                 for packet in self.captured:
                     packet.destroy()
                 self.captured = []
@@ -89,9 +90,9 @@ if __name__ == "__main__":
             self.on_screen.append(title)
             title.pack()
 
+            # Set up scroll box for network traffic________
             if not self.built:
                 self.built = True
-                # Frame for Network traffic____________________
                 self.container = Frame(self.screen, relief=GROOVE, bd=5)
                 self.captured.append(self.container)
 
@@ -105,7 +106,7 @@ if __name__ == "__main__":
                 self.canvas.configure(yscrollcommand=self.scrollbar.set)
                 self.captured.append(self.scrollbar)
 
-                self.canvas.create_window((0, 0), window=self.traffic_frame)
+                self.canvas.create_window((self.screen.winfo_screenwidth()//4, 0), window=self.traffic_frame)
                 self.traffic_frame.bind("<Configure>",
                                         lambda event: self.canvas.configure(scrollregion=self.canvas.bbox("all"),
                                                                             width=self.screen.winfo_screenwidth(),
@@ -122,10 +123,11 @@ if __name__ == "__main__":
                                "{TCP: TCP Port: %TCP.sport% -> %TCP.dport%\t}"
                                "{UDP: UDP Port: %UDP.sport% -> %UDP.dport%\t}"
                                "{Ether: type: %Ether.type%}")
-            packet_button = Button(self.traffic_frame, text=name, command=lambda: self.packet_details(data))
+            packet_button = Button(self.traffic_frame, text=name, command=lambda: self.packet_details(data),
+                                   width=self.screen.winfo_screenwidth())
             self.packets.append(packet_button)
             packet_button.pack()
-            return
+            self.canvas.yview_moveto(1)
 
         # Shows the data contained inside the packet____________________________________________________________________
         def packet_details(self, data):
