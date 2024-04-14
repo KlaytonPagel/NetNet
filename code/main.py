@@ -208,10 +208,33 @@ if __name__ == "__main__":
             self.on_screen.append(back_button)
             back_button.pack(side=LEFT)
 
+            # Button to save filter as a JSON file_________
+            save_button = Button(nav_bar, text="Save", font=("arial", 15), command=self.save_filter)
+            self.on_screen.append(save_button)
+            save_button.pack(side=RIGHT)
+
+            # Frame for filter name label and entry box____
+            filter_name_frame = Frame(self.screen)
+            self.on_screen.append(filter_name_frame)
+            filter_name_frame.pack()
+
+            # Label for the filter name____________________
+            filter_name_label = Label(filter_name_frame, text="Filter Name")
+            self.on_screen.append(filter_name_label)
+            filter_name_label.pack(side=LEFT)
+
+            # Entry To Name Your Filter____________________
+            filter_name = Entry(filter_name_frame, font=("arial", 12))
+            self.on_screen.append(filter_name)
+            filter_name.pack(side=RIGHT)
+
             # Button to add another filter parameter_______
             add_param_button = Button(self.screen, text="Add Parameter", font=("arial", 12), command=add_parameter)
             self.on_screen.append(add_param_button)
             add_param_button.pack()
+
+        def save_filter(self):
+            pass
 
 
     NetNet()
