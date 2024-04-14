@@ -2,6 +2,7 @@ from tkinter import *
 from scapy.all import *
 from functools import partial
 import datetime as datetime
+import json
 
 
 if __name__ == "__main__":
@@ -186,7 +187,8 @@ if __name__ == "__main__":
                 param_frame.pack()
 
                 # option menu to select parameter type
-                param = OptionMenu(param_frame, StringVar(), *options)
+                choice = StringVar()
+                param = OptionMenu(param_frame, choice, *options)
                 self.on_screen.append(param)
                 param.pack(side=LEFT)
 
@@ -195,8 +197,12 @@ if __name__ == "__main__":
                 self.on_screen.append(entry)
                 entry.pack(side=RIGHT)
 
+                # Store the parameter and value for saving later
+                parameters.append([choice, entry])
+
             self.clear_screen()
             options = ["Source IP", "Destination IP", "Protocol"]
+            parameters = []
 
             # Navigation Bar to hold all buttons___________
             nav_bar = Frame(self.screen)
@@ -209,7 +215,8 @@ if __name__ == "__main__":
             back_button.pack(side=LEFT)
 
             # Button to save filter as a JSON file_________
-            save_button = Button(nav_bar, text="Save", font=("arial", 15), command=self.save_filter)
+            save_button = Button(nav_bar, text="Save", font=("arial", 15), command=lambda: self.save_filter(parameters,
+                                                                                                            filter_name.get()))
             self.on_screen.append(save_button)
             save_button.pack(side=RIGHT)
 
@@ -233,8 +240,21 @@ if __name__ == "__main__":
             self.on_screen.append(add_param_button)
             add_param_button.pack()
 
-        def save_filter(self):
-            pass
+        # Save the filter in a JSON format______________________________________________________________________________
+        def save_filter(self, parameters, filter_name):
+            param_count = 0
+            param_dict = {}
+
+            # Put all filter inputs into a dictionary format to turn into JSON
+            for param in parameters:
+                param_dict[param_count] = [param[0].get(), param[1].get()]
+                param_count += 1
+
+            # Dump data to JSON and save to a file with the given name
+            json_data = json.dumps(param_dict)
+            with open(f"../Filters/{filter_name}", "w") as filter_file:
+                filter_file.write(json_data)
+
 
 
     NetNet()
