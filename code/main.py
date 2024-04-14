@@ -232,6 +232,11 @@ if __name__ == "__main__":
 
         # Screen for making a filter____________________________________________________________________________________
         def filter_screen(self, name="", filter_parameters=None):
+            # Deletes the parameter____________________________________________
+            def del_parameter(widgets):
+                for widget in widgets:
+                    widget.destroy()
+                    
             # Adds another parameter and value to the filter creator___________
             def add_parameter(parameter="", value=""):
                 # add a frame for the parameter and value entries
@@ -239,21 +244,27 @@ if __name__ == "__main__":
                 self.on_screen.append(param_frame)
                 param_frame.pack()
 
-                # option menu to select parameter type
-                param_choice = StringVar()
-                param = OptionMenu(param_frame, param_choice, *options)
-                self.on_screen.append(param)
-                param.pack(side=LEFT)
-                param_choice.set(parameter)
-
                 # entry box for value of parameter
                 entry = Entry(param_frame, font=("Arial", 12))
                 self.on_screen.append(entry)
                 entry.pack(side=RIGHT)
                 entry.insert(0, value)
 
+                # option menu to select parameter type
+                param_choice = StringVar()
+                param = OptionMenu(param_frame, param_choice, *options)
+                self.on_screen.append(param)
+                param.pack(side=RIGHT)
+                param_choice.set(parameter)
+
                 # Store the parameter and value for saving later
                 parameters.append([param_choice, entry])
+                widgets = [entry, param, param_frame]
+
+                # Button to delete the filter parameter
+                delete_button = Button(param_frame, text="X", command=lambda params=widgets: del_parameter(params))
+                self.on_screen.append(delete_button)
+                delete_button.pack(side=RIGHT)
 
             self.clear_screen()
             options = ["Source IP", "Destination IP", "Source MAC", "Destination Mac",
