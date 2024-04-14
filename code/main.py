@@ -102,6 +102,20 @@ if __name__ == "__main__":
             self.on_screen.append(filter_button)
             filter_button.pack(side=RIGHT)
 
+            # Option menu to select existing filter_______
+            filters = self.get_filters()
+            filter_choice = StringVar()
+            filter_choice.set("Select Filter")
+            filter_options = OptionMenu(nav_bar, filter_choice, *filters)
+            self.on_screen.append(filter_options)
+            filter_options.pack(side=RIGHT)
+
+            # Button to apply the selected filter___________
+            apply_filter_button = Button(nav_bar, text="Apply", font=("arial", 15),
+                                        command=lambda: self.load_filter_creator(filter_choice.get()))
+            self.on_screen.append(apply_filter_button)
+            apply_filter_button.pack(side=RIGHT)
+
             # Title Label__________________________________
             title = Label(self.screen, text="NetNet", font=("arial", 25))
             self.on_screen.append(title)
@@ -233,7 +247,7 @@ if __name__ == "__main__":
             filter_options.pack(side=RIGHT)
 
             # Button to load the selected filter___________
-            load_filter_button = Button(nav_bar, text="Load", font=("arial", 15), command=lambda: self.load_filter(filter_choice.get()))
+            load_filter_button = Button(nav_bar, text="Load", font=("arial", 15), command=lambda: self.load_filter_creator(filter_choice.get()))
             self.on_screen.append(load_filter_button)
             load_filter_button.pack(side=RIGHT)
 
@@ -286,7 +300,7 @@ if __name__ == "__main__":
             return filters
 
         # Load an existing filter into the filter creation screen_______________________________________________________
-        def load_filter(self, filter_name):
+        def load_filter_creator(self, filter_name):
             params = []
             with open(f"../Filters/{filter_name}", "r") as filter_file:
                 filter_dict = json.load(filter_file)
