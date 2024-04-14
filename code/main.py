@@ -31,6 +31,8 @@ if __name__ == "__main__":
             self.built = False
             self.main_screen()
 
+            self.filter = ""
+
             # Set up the packet sniffer____________________
             self.sniffer = AsyncSniffer(prn=self.add_packets)
 
@@ -69,6 +71,7 @@ if __name__ == "__main__":
         # Start Sniffing Network Traffic________________________________________________________________________________
         def start_sniffing(self):
             time.sleep(0.5)
+            self.sniffer = AsyncSniffer(prn=self.add_packets, filter=self.filter)
             self.sniffer.start()
 
         # Build The Main Startup Window_________________________________________________________________________________
@@ -112,7 +115,7 @@ if __name__ == "__main__":
 
             # Button to apply the selected filter___________
             apply_filter_button = Button(nav_bar, text="Apply", font=("arial", 15),
-                                        command=lambda: self.load_filter_creator(filter_choice.get()))
+                                        command=lambda: self.apply_filter(filter_choice.get()))
             self.on_screen.append(apply_filter_button)
             apply_filter_button.pack(side=RIGHT)
 
@@ -153,6 +156,40 @@ if __name__ == "__main__":
             self.container.pack(fill=BOTH, expand=True)
             self.scrollbar.pack(side="right", fill="y")
             self.canvas.pack()
+
+        # Apply the selected filter to the sniffed traffic______________________________________________________________
+        def apply_filter(self, filter_name):
+            params = []
+            filters = []
+            with open(f"../Filters/{filter_name}", "r") as filter_file:
+                filter_dict = json.load(filter_file)
+
+            for param in filter_dict.values():
+                params.append(param)
+
+            for param in params:
+                if param[0] == "Source IP":
+                    filters.append(f"src host {param[1]}")
+
+                elif param[0] == "Destination IP":
+                    filters.append(f"dst host {param[1]}")
+
+                elif param[0] == "Source MAC":
+                    filters.append(f"ether src host {param[1]}")
+
+                elif param[0] == "Destination MAC":
+                    filters.append(f"ether dst host {param[1]}")
+
+                elif param[0] == "Source Port":
+                    filters.append(f"src port {param[1]}")
+
+                elif param[0] == "Destination Port":
+                    filters.append(f"dst Port {param[1]}")
+
+                elif param[0] == "Protocol":
+                    filters.append(f"{param[1]}")
+
+            self.filter = " and ".join(filters)
 
         # Adds A Button For A Packet To The Traffic Frame_______________________________________________________________
         def add_packets(self, pkt):
@@ -219,7 +256,8 @@ if __name__ == "__main__":
                 parameters.append([param_choice, entry])
 
             self.clear_screen()
-            options = ["Source IP", "Destination IP", "Protocol"]
+            options = ["Source IP", "Destination IP", "Source MAC", "Destination Mac",
+                       "Source Port", "Destination Port", "Protocol"]
             parameters = []
 
             # Navigation Bar to hold all buttons___________
