@@ -3,6 +3,7 @@ from scapy.all import *
 from functools import partial
 import datetime as datetime
 import json
+import os
 
 
 if __name__ == "__main__":
@@ -179,26 +180,29 @@ if __name__ == "__main__":
             data_entry.pack(fill=BOTH, expand=True)
 
         # Screen for making a filter____________________________________________________________________________________
-        def filter_screen(self):
-            def add_parameter():
+        def filter_screen(self, name="", filter_parameters=None):
+            # Adds another parameter and value to the filter creator___________
+            def add_parameter(parameter="", value=""):
                 # add a frame for the parameter and value entries
                 param_frame = Frame(self.screen)
                 self.on_screen.append(param_frame)
                 param_frame.pack()
 
                 # option menu to select parameter type
-                choice = StringVar()
-                param = OptionMenu(param_frame, choice, *options)
+                param_choice = StringVar()
+                param = OptionMenu(param_frame, param_choice, *options)
                 self.on_screen.append(param)
                 param.pack(side=LEFT)
+                param_choice.set(parameter)
 
                 # entry box for value of parameter
                 entry = Entry(param_frame, font=("Arial", 12))
                 self.on_screen.append(entry)
                 entry.pack(side=RIGHT)
+                entry.insert(0, value)
 
                 # Store the parameter and value for saving later
-                parameters.append([choice, entry])
+                parameters.append([param_choice, entry])
 
             self.clear_screen()
             options = ["Source IP", "Destination IP", "Protocol"]
@@ -220,6 +224,19 @@ if __name__ == "__main__":
             self.on_screen.append(save_button)
             save_button.pack(side=RIGHT)
 
+            # Option menu to select existing filter_______
+            filters = self.get_filters()
+            filter_choice = StringVar()
+            filter_choice.set("Load Filter")
+            filter_options = OptionMenu(nav_bar, filter_choice, *filters)
+            self.on_screen.append(filter_options)
+            filter_options.pack(side=RIGHT)
+
+            # Button to load the selected filter___________
+            load_filter_button = Button(nav_bar, text="Load", font=("arial", 15), command=lambda: self.load_filter(filter_choice.get()))
+            self.on_screen.append(load_filter_button)
+            load_filter_button.pack(side=RIGHT)
+
             # Frame for filter name label and entry box____
             filter_name_frame = Frame(self.screen)
             self.on_screen.append(filter_name_frame)
@@ -234,11 +251,17 @@ if __name__ == "__main__":
             filter_name = Entry(filter_name_frame, font=("arial", 12))
             self.on_screen.append(filter_name)
             filter_name.pack(side=RIGHT)
+            filter_name.insert(0, name)
 
             # Button to add another filter parameter_______
             add_param_button = Button(self.screen, text="Add Parameter", font=("arial", 12), command=add_parameter)
             self.on_screen.append(add_param_button)
             add_param_button.pack()
+
+            # If loaded filter apply the parameters________
+            if filter_parameters is not None:
+                for param in filter_parameters:
+                    add_parameter(parameter=param[0], value=param[1])
 
         # Save the filter in a JSON format______________________________________________________________________________
         def save_filter(self, parameters, filter_name):
@@ -255,6 +278,23 @@ if __name__ == "__main__":
             with open(f"../Filters/{filter_name}", "w") as filter_file:
                 filter_file.write(json_data)
 
+        # Returns all the existing filters from the filters file________________________________________________________
+        def get_filters(self):
+            filters = []
+            for file in  os.listdir("../Filters"):
+                filters.append(file)
+            return filters
+
+        # Load an existing filter into the filter creation screen_______________________________________________________
+        def load_filter(self, filter_name):
+            params = []
+            with open(f"../Filters/{filter_name}", "r") as filter_file:
+                filter_dict = json.load(filter_file)
+
+            for param in filter_dict.values():
+                params.append(param)
+
+            self.filter_screen(name=filter_name, filter_parameters=params)
 
 
     NetNet()
