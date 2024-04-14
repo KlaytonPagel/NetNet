@@ -1,6 +1,7 @@
 from tkinter import *
 from scapy.all import *
 from functools import partial
+from datetime import *
 
 
 if __name__ == "__main__":
@@ -119,7 +120,8 @@ if __name__ == "__main__":
         # Adds A Button For A Packet To The Traffic Frame_______________________________________________________________
         def add_packets(self, pkt):
             data = pkt.show(dump=True)
-            name = pkt.sprintf("{IP: IPV4: %IP.src% -> %IP.dst%\t}"
+            name = pkt.sprintf(f"{datetime.today().strftime('%H:%M:%S.%f')}\t"
+                               "{IP: IPV4: %IP.src% -> %IP.dst%\t}"
                                "{TCP: TCP Port: %TCP.sport% -> %TCP.dport%\t}"
                                "{UDP: UDP Port: %UDP.sport% -> %UDP.dport%\t}"
                                "{Ether: type: %Ether.type%}")
