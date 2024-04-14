@@ -1,5 +1,6 @@
 from tkinter import *
 from scapy.all import *
+from functools import partial
 
 
 if __name__ == "__main__":
@@ -17,9 +18,14 @@ if __name__ == "__main__":
             # Holds all widgets on the screen______________
             self.on_screen = []
             self.captured = []
+            self.packets = []
 
             # Set up the main screen_______________________
             self.traffic_frame = None
+            self.canvas = None
+            self.scrollbar = None
+            self.container = None
+            self.built = False
             self.main_screen()
 
             # Set up the packet sniffer____________________
@@ -41,30 +47,29 @@ if __name__ == "__main__":
                 widget.destroy()
             self.on_screen = []
 
-            # Forget packet buttons to be repacked later___
-            for packet in self.captured:
-                packet.pack_forget()
-
             # If clear traffic is on destroy packet buttons
             if clear_traffic:
                 for packet in self.captured:
                     packet.destroy()
                 self.captured = []
+                for packet in self.packets:
+                    packet.destroy()
+                self.packets = []
 
-
+        def scroll_bar_config(self, event):
+            self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
         # Build The Main Startup Window_________________________________________________________________________________
         def main_screen(self):
             self.clear_screen()
 
             # Navigation Bar frame_________________________
-            nav_bar = Frame(self.screen, width=self.screen.winfo_screenwidth())
+            nav_bar = Frame(self.screen, width=self.screen.winfo_screenwidth(), relief="groove")
             self.on_screen.append(nav_bar)
             nav_bar.pack(fill=X)
 
             # Start Button to start Sniffing_______________
-            start_button = Button(nav_bar, text="Start", font=("arial", 15), command=lambda: [self.main_screen(),
-                                                                                              self.sniffer.start()])
+            start_button = Button(nav_bar, text="Start", font=("arial", 15), command=lambda: [self.sniffer.start()])
             self.on_screen.append(start_button)
             start_button.pack(side=LEFT)
 
@@ -84,32 +89,51 @@ if __name__ == "__main__":
             self.on_screen.append(title)
             title.pack()
 
-            # Frame for Network traffic____________________
-            # If there is no previously captured traffic
-            if len(self.captured) == 0:
-                self.traffic_frame = Frame(self.screen)
+            if not self.built:
+                self.built = True
+                # Frame for Network traffic____________________
+                self.container = Frame(self.screen, relief=GROOVE, bd=5)
+                self.captured.append(self.container)
+
+                self.canvas = Canvas(self.container)
+                self.captured.append(self.canvas)
+
+                self.traffic_frame = Frame(self.canvas)
                 self.captured.append(self.traffic_frame)
-                self.traffic_frame.pack(fill=X)
-            else:
-                # Display any traffic that is still in the system
-                for packet in self.captured:
-                    packet.pack()
+
+                self.scrollbar = Scrollbar(self.container, orient="vertical", command=self.canvas.yview)
+                self.canvas.configure(yscrollcommand=self.scrollbar.set)
+                self.captured.append(self.scrollbar)
+
+                self.canvas.create_window((0, 0), window=self.traffic_frame)
+                self.traffic_frame.bind("<Configure>",
+                                        lambda event: self.canvas.configure(scrollregion=self.canvas.bbox("all"),
+                                                                            width=self.screen.winfo_screenwidth(),
+                                                                            height=self.canvas.winfo_screenheight()))
+
+            self.container.pack(fill=BOTH, expand=True)
+            self.scrollbar.pack(side="right", fill="y")
+            self.canvas.pack()
 
         # Adds A Button For A Packet To The Traffic Frame_______________________________________________________________
         def add_packets(self, pkt):
             data = pkt.show(dump=True)
-            name = pkt.sprintf("{IP: IPV4: %IP.src% -> %IP.dst%}"
-                               "{TCP: TCP Port: %TCP.sport% -> %TCP.dport%}"
-                               "{UDP: UDP Port: %UDP.sport% -> %UDP.dport%}")
-            packet_button = Button(self.traffic_frame, text=name, command=lambda: self.packet_details(data),
-                                   width=self.screen.winfo_screenwidth())
-            self.captured.append(packet_button)
+            name = pkt.sprintf("{IP: IPV4: %IP.src% -> %IP.dst%\t}"
+                               "{TCP: TCP Port: %TCP.sport% -> %TCP.dport%\t}"
+                               "{UDP: UDP Port: %UDP.sport% -> %UDP.dport%\t}"
+                               "{Ether: type: %Ether.type%}")
+            packet_button = Button(self.traffic_frame, text=name, command=lambda: self.packet_details(data))
+            self.packets.append(packet_button)
             packet_button.pack()
             return
 
         # Shows the data contained inside the packet____________________________________________________________________
         def packet_details(self, data):
             self.clear_screen()
+
+            self.container.pack_forget()
+            self.scrollbar.pack_forget()
+            self.canvas.pack_forget()
 
             # Navigation Bar to hold all buttons___________
             nav_bar = Frame(self.screen)
