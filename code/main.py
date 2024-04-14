@@ -34,6 +34,7 @@ if __name__ == "__main__":
             self.scrollbar = None
             self.container = None
             self.built = False
+            self.start_color = "white"
             self.main_screen()
 
             self.filter = ""
@@ -68,6 +69,7 @@ if __name__ == "__main__":
 
         # Stop Sniffing Network Traffic_________________________________________________________________________________
         def stop_sniffing(self):
+            self.start_color = "white"
             try:
                 self.sniffer.stop()
             except:
@@ -89,13 +91,15 @@ if __name__ == "__main__":
             nav_bar.pack(fill=X)
 
             # Start Button to start Sniffing_______________
-            start_button = Button(nav_bar, text="Start", font=("arial", 15), command=lambda: [self.stop_sniffing(),
-                                                                                              self.start_sniffing()])
+            start_button = Button(nav_bar, text="Start", font=("arial", 15), bg=self.start_color,
+                                  command=lambda: [self.stop_sniffing(), self.start_sniffing(),
+                                                   start_button.configure(bg="green")])
             self.on_screen.append(start_button)
             start_button.pack(side=LEFT)
 
             # Stop Button to stop Sniffing_________________
-            stop_button = Button(nav_bar, text="Stop", font=("arial", 15), command=lambda: self.stop_sniffing())
+            stop_button = Button(nav_bar, text="Stop", font=("arial", 15),
+                                 command=lambda: [self.stop_sniffing(), start_button.configure(bg="white")])
             self.on_screen.append(stop_button)
             stop_button.pack(side=LEFT)
 
