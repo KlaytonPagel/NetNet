@@ -52,6 +52,7 @@ if __name__ == "__main__":
 
             # If clear traffic is on destroy packet buttons
             if clear_traffic:
+                self.filter = ""
                 self.built = False
                 for packet in self.captured:
                     packet.destroy()
