@@ -7,7 +7,7 @@ import datetime as datetime
 if __name__ == "__main__":
 
     # Manage the different screens and windows__________________________________________________________________________
-    class ScreenManager:
+    class NetNet:
 
         # Initial window set up_________________________________________________________________________________________
         def __init__(self):
@@ -36,6 +36,10 @@ if __name__ == "__main__":
 
         # Clears all the widgets from the screen________________________________________________________________________
         def clear_screen(self, clear_traffic=False):
+            if self.built:
+                self.container.pack_forget()
+                self.scrollbar.pack_forget()
+                self.canvas.pack_forget()
 
             self.stop_sniffing()
             # Clear widgets from the screen________________
@@ -90,6 +94,11 @@ if __name__ == "__main__":
                                                                                               self.main_screen()])
             self.on_screen.append(clear_button)
             clear_button.pack(side=LEFT)
+
+            # Button to go to the filter creation screen___
+            filter_button = Button(nav_bar, text="Filters", font=("arial", 15), command=self.filter_screen)
+            self.on_screen.append(filter_button)
+            filter_button.pack(side=RIGHT)
 
             # Title Label__________________________________
             title = Label(self.screen, text="NetNet", font=("arial", 25))
@@ -151,10 +160,6 @@ if __name__ == "__main__":
         def packet_details_screen(self, data):
             self.clear_screen()
 
-            self.container.pack_forget()
-            self.scrollbar.pack_forget()
-            self.canvas.pack_forget()
-
             # Navigation Bar to hold all buttons___________
             nav_bar = Frame(self.screen)
             self.on_screen.append(nav_bar)
@@ -172,5 +177,41 @@ if __name__ == "__main__":
             data_entry.configure(state=DISABLED)
             data_entry.pack(fill=BOTH, expand=True)
 
+        # Screen for making a filter____________________________________________________________________________________
+        def filter_screen(self):
+            def add_parameter():
+                # add a frame for the parameter and value entries
+                param_frame = Frame(self.screen)
+                self.on_screen.append(param_frame)
+                param_frame.pack()
 
-    ScreenManager()
+                # option menu to select parameter type
+                param = OptionMenu(param_frame, StringVar(), *options)
+                self.on_screen.append(param)
+                param.pack(side=LEFT)
+
+                # entry box for value of parameter
+                entry = Entry(param_frame, font=("Arial", 12))
+                self.on_screen.append(entry)
+                entry.pack(side=RIGHT)
+
+            self.clear_screen()
+            options = ["Source IP", "Destination IP", "Protocol"]
+
+            # Navigation Bar to hold all buttons___________
+            nav_bar = Frame(self.screen)
+            self.on_screen.append(nav_bar)
+            nav_bar.pack(fill=X)
+
+            # Button to return back to the main screen_____
+            back_button = Button(nav_bar, text="Back", font=("arial", 15), command=self.main_screen)
+            self.on_screen.append(back_button)
+            back_button.pack(side=LEFT)
+
+            # Button to add another filter parameter_______
+            add_param_button = Button(self.screen, text="Add Parameter", font=("arial", 12), command=add_parameter)
+            self.on_screen.append(add_param_button)
+            add_param_button.pack()
+
+
+    NetNet()
